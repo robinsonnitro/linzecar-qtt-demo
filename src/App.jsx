@@ -670,8 +670,29 @@ function LinzerView({ go, txnRequest, onComplete }) {
   const [isSecondJob, setIsSecondJob] = useState(false);
   const [secondJob]                   = useState(() => randomJob());
   const [completing, setCompleting]   = useState(false);
+  const [rejections, setRejections]   = useState(0);
+  const [rejectAlert, setRejectAlert] = useState(null); // {type, msg}
+  const [banned, setBanned]           = useState(false);
 
   const activeJob = isSecondJob ? secondJob : txnRequest;
+
+  const COMMISSION_BASE = 1.05;
+  const commission = rejections >= 2 ? COMMISSION_BASE * 0.95 : COMMISSION_BASE;
+
+  const handleReject = () => {
+    const next = rejections + 1;
+    setRejections(next);
+    setNotification(false);
+    if (next === 1) {
+      setRejectAlert({ type:'warn', msg:'Este es tu 1er rechazo, no pasa nada. Pero recuerda: acumular rechazos afecta tu comisión.' });
+    } else if (next === 2) {
+      setRejectAlert({ type:'danger', msg:'2do rechazo — tu comisión baja un 5%. Ahora recibes UF 1,00 por transacción.' });
+    } else {
+      setRejectAlert({ type:'banned', msg:'3er rechazo — tu cuenta ha sido suspendida. Ya no puedes operar como Linzer.' });
+      setBanned(true);
+      setAvailable(false);
+    }
+  };
 
   const login = () => {
     if (email==='juanperez@linzer.cl' && pass==='mapache') { setErr(''); setScreen('home'); }
@@ -785,7 +806,7 @@ function LinzerView({ go, txnRequest, onComplete }) {
                 </div>
               ))}
             </div>
-            {notification && (
+            {notification && !banned && (
               <div style={{ margin:'0 16px 16px', background:'linear-gradient(135deg, #001820, #002535)', border:`2px solid ${P.qt}`, borderRadius:18, padding:20 }}>
                 <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:12 }}>
                   <span style={{ fontSize:24 }}>🔔</span>
@@ -796,16 +817,59 @@ function LinzerView({ go, txnRequest, onComplete }) {
                 </div>
                 <div style={{ background:'rgba(255,255,255,0.05)', borderRadius:10, padding:12, marginBottom:12 }}>
                   <div style={{ color:'#fff', fontSize:13, fontWeight:600 }}>
-                    {activeJob?.car ? `${activeJob.car.brand} ${activeJob.car.model}` : 'Toyota Land Cruiser 4.0'}
+                    {activeJob?.car ? `${activeJob.car.brand} ${activeJob.car.model}` : 'Auto demo'}
                   </div>
                   <div style={{ color:P.mut, fontSize:12, marginTop:3 }}>
-                    📍 {activeJob?.point ? `${activeJob.point.local} — ${activeJob.point.com}` : 'Autoplanet — Maipú'}
+                    📍 {activeJob?.point ? `${activeJob.point.local} — ${activeJob.point.com}` : 'Punto demo'}
                   </div>
-                  <div style={{ color:P.qt, fontSize:12, fontWeight:700, marginTop:5 }}>Tu comisión: UF 1,05 (70%)</div>
+                  <div style={{ color:P.qt, fontSize:12, fontWeight:700, marginTop:5 }}>
+                    Tu comisión: UF {commission.toFixed(2)} (70%){rejections>=2 && <span style={{ color:P.err, marginLeft:6 }}>-5%</span>}
+                  </div>
+                  {rejections > 0 && (
+                    <div style={{ marginTop:6, fontSize:10, color:P.warn }}>
+                      ⚠️ Tienes {rejections} rechazo{rejections>1?'s':''} — {rejections===1?'1 más y baja tu comisión':'1 más y serás suspendido'}
+                    </div>
+                  )}
                 </div>
                 <div style={{ display:'flex', gap:10 }}>
-                  <button onClick={() => setNotification(false)} style={{ flex:1, background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.7)', border:'1px solid #2A3040', borderRadius:10, padding:11, cursor:'pointer', fontSize:13 }}>Rechazar</button>
-                  <button onClick={() => { setNotification(false); setScreen('job'); }} style={{ flex:1, background:P.ok, color:'#000', border:'none', borderRadius:10, padding:11, fontWeight:800, cursor:'pointer', fontSize:13 }}>✓ Aceptar</button>
+                  <button onClick={handleReject} style={{ flex:1, background:'rgba(239,68,68,0.1)', color:'#EF4444', border:'1px solid rgba(239,68,68,0.3)', borderRadius:10, padding:11, cursor:'pointer', fontSize:13, fontWeight:600 }}>
+                    {rejections===0?'Rechazar':rejections===1?'⚠️ Rechazar':'🚨 Rechazar'}
+                  </button>
+                  <button onClick={() => { setNotification(false); setRejectAlert(null); setScreen('job'); }} style={{ flex:1, background:P.ok, color:'#000', border:'none', borderRadius:10, padding:11, fontWeight:800, cursor:'pointer', fontSize:13 }}>✓ Aceptar</button>
+                </div>
+              </div>
+            )}
+
+            {/* REJECT ALERT */}
+            {rejectAlert && !notification && (
+              <div style={{ margin:'0 16px 16px', borderRadius:16, padding:18, border:`1.5px solid ${rejectAlert.type==='warn'?P.warn:rejectAlert.type==='danger'?P.err:'#6B21A8'}`, background: rejectAlert.type==='warn'?'rgba(245,158,11,0.08)':rejectAlert.type==='danger'?'rgba(239,68,68,0.08)':'rgba(107,33,168,0.12)' }}>
+                <div style={{ fontSize:28, marginBottom:8, textAlign:'center' }}>
+                  {rejectAlert.type==='warn'?'⚠️':rejectAlert.type==='danger'?'🔴':'🚫'}
+                </div>
+                <div style={{ color: rejectAlert.type==='warn'?P.warn:rejectAlert.type==='danger'?P.err:'#C084FC', fontWeight:800, fontSize:14, textAlign:'center', marginBottom:8 }}>
+                  {rejectAlert.type==='warn'?'Primer rechazo':rejectAlert.type==='danger'?'Segundo rechazo — penalización':'Cuenta suspendida'}
+                </div>
+                <div style={{ color:'rgba(255,255,255,0.7)', fontSize:12, lineHeight:1.6, textAlign:'center', marginBottom: rejectAlert.type!=='banned'?14:0 }}>
+                  {rejectAlert.msg}
+                </div>
+                {rejectAlert.type!=='banned' && (
+                  <button onClick={() => setRejectAlert(null)} style={{ width:'100%', background:'rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.7)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:10, padding:10, cursor:'pointer', fontSize:13 }}>
+                    Entendido
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* BANNED STATE */}
+            {banned && (
+              <div style={{ margin:'0 16px 16px', borderRadius:16, padding:22, border:'1.5px solid #6B21A8', background:'rgba(107,33,168,0.12)', textAlign:'center' }}>
+                <div style={{ fontSize:40, marginBottom:10 }}>🚫</div>
+                <div style={{ color:'#C084FC', fontWeight:900, fontSize:16, marginBottom:8 }}>Cuenta suspendida</div>
+                <div style={{ color:'rgba(255,255,255,0.55)', fontSize:12, lineHeight:1.6 }}>
+                  Has acumulado 3 rechazos. Tu cuenta ha sido bloqueada por QTT. Contacta a soporte para reactivación.
+                </div>
+                <div style={{ marginTop:14, background:'rgba(255,255,255,0.05)', borderRadius:10, padding:10 }}>
+                  <div style={{ fontSize:11, color:P.mut }}>soporte@qtt.cl</div>
                 </div>
               </div>
             )}
