@@ -809,56 +809,60 @@ function LinzerView({ go, txnRequest, onComplete }) {
             {notification && !banned && (
               <div style={{ margin:'0 16px 16px', background:'linear-gradient(135deg, #001820, #002535)', border:`2px solid ${P.qt}`, borderRadius:18, padding:20 }}>
                 <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:12 }}>
-                  <span style={{ fontSize:24 }}>🔔</span>
+                  <span style={{ fontSize:24 }}>{'🔔'}</span>
                   <div>
-                    <div style={{ color:P.qt, fontWeight:800, fontSize:14 }}>¡Nueva solicitud de Linzecar!</div>
-                    <div style={{ color:'rgba(255,255,255,0.5)', fontSize:11 }}>Ingresó automáticamente vía API</div>
+                    <div style={{ color:P.qt, fontWeight:800, fontSize:14 }}>Nueva solicitud de Linzecar</div>
+                    <div style={{ color:'rgba(255,255,255,0.5)', fontSize:11 }}>Ingreso automatico via API</div>
                   </div>
                 </div>
                 <div style={{ background:'rgba(255,255,255,0.05)', borderRadius:10, padding:12, marginBottom:12 }}>
-                  <div style={{ color:'#fff', fontSize:13, fontWeight:700 }}>
+                  <div style={{ color:'#fff', fontSize:13, fontWeight:700, marginBottom:4 }}>
                     {activeJob?.car ? `${activeJob.car.brand} ${activeJob.car.model}` : 'Geely GS 1.8 Gc Mt'}
                   </div>
-                  <div style={{ display:'flex', gap:12, marginTop:4 }}>
-                    <span style={{ color:P.mut, fontSize:11 }}>📅 {activeJob?.car?.yr || 2019}</span>
-                    <span style={{ color:P.mut, fontSize:11 }}>🛣️ {activeJob?.car?.km ? activeJob.car.km.toLocaleString('es-CL')+' km' : '100.000 km'}</span>
-                    <span style={{ color:P.mut, fontSize:11 }}>🚙 {activeJob?.car?.type || 'SUV'}</span>
+                  <div style={{ display:'flex', gap:10, marginBottom:4 }}>
+                    <span style={{ color:P.mut, fontSize:11 }}>{'📅'} {activeJob?.car?.yr || 2019}</span>
+                    <span style={{ color:P.mut, fontSize:11 }}>{'🛣'} {activeJob?.car?.km ? activeJob.car.km.toLocaleString('es-CL') + ' km' : '100.000 km'}</span>
+                    <span style={{ color:P.mut, fontSize:11 }}>{'🚙'} {activeJob?.car?.type || 'SUV'}</span>
                   </div>
-                  <div style={{ color:P.mut, fontSize:12, marginTop:4 }}>
-                    📍 {activeJob?.point ? `${activeJob.point.local} — ${activeJob.point.com}` : 'Autoplanet — Maipú'}
+                  <div style={{ color:P.mut, fontSize:12 }}>
+                    {'📍'} {activeJob?.point ? `${activeJob.point.local} - ${activeJob.point.com}` : 'Autoplanet - Maipu'}
                   </div>
-                  </div>
-                  <div style={{ color:P.qt, fontSize:12, fontWeight:700, marginTop:5 }}>
-                    Tu comisión: UF {commission.toFixed(2)} (70%){rejections>=2 && <span style={{ color:P.err, marginLeft:6 }}>-5%</span>}
+                  <div style={{ color:P.qt, fontSize:12, fontWeight:700, marginTop:6 }}>
+                    {'Comision: UF '}{commission.toFixed(2)}{' (70%)'}
+                    {rejections >= 2 && <span style={{ color:P.err, marginLeft:6 }}>-5%</span>}
                   </div>
                   {rejections > 0 && (
                     <div style={{ marginTop:6, fontSize:10, color:P.warn }}>
-                      ⚠️ Tienes {rejections} rechazo{rejections>1?'s':''} — {rejections===1?'1 más y baja tu comisión':'1 más y serás suspendido'}
+                      {rejections === 1 ? 'Advertencia: 1 rechazo mas y baja tu comision' : 'Alerta: 1 rechazo mas y seras suspendido'}
                     </div>
                   )}
                 </div>
                 <div style={{ display:'flex', gap:10 }}>
                   <button onClick={handleReject} style={{ flex:1, background:'rgba(239,68,68,0.1)', color:'#EF4444', border:'1px solid rgba(239,68,68,0.3)', borderRadius:10, padding:11, cursor:'pointer', fontSize:13, fontWeight:600 }}>
-                    {rejections===0?'Rechazar':rejections===1?'⚠️ Rechazar':'🚨 Rechazar'}
+                    {rejections === 0 ? 'Rechazar' : rejections === 1 ? 'Rechazar (!)' : 'Rechazar (!!)'}
                   </button>
-                  <button onClick={() => { setNotification(false); setRejectAlert(null); setScreen('job'); }} style={{ flex:1, background:P.ok, color:'#000', border:'none', borderRadius:10, padding:11, fontWeight:800, cursor:'pointer', fontSize:13 }}>✓ Aceptar</button>
+                  <button onClick={() => { setNotification(false); setRejectAlert(null); setScreen('job'); }} style={{ flex:1, background:P.ok, color:'#000', border:'none', borderRadius:10, padding:11, fontWeight:800, cursor:'pointer', fontSize:13 }}>Aceptar</button>
                 </div>
               </div>
             )}
 
-            {/* REJECT ALERT */}
             {rejectAlert && !notification && (
-              <div style={{ margin:'0 16px 16px', borderRadius:16, padding:18, border:`1.5px solid ${rejectAlert.type==='warn'?P.warn:rejectAlert.type==='danger'?P.err:'#6B21A8'}`, background: rejectAlert.type==='warn'?'rgba(245,158,11,0.08)':rejectAlert.type==='danger'?'rgba(239,68,68,0.08)':'rgba(107,33,168,0.12)' }}>
+              <div style={{ margin:'0 16px 16px', borderRadius:16, padding:18,
+                border: `1.5px solid ${rejectAlert.type === 'warn' ? P.warn : rejectAlert.type === 'danger' ? P.err : '#6B21A8'}`,
+                background: rejectAlert.type === 'warn' ? 'rgba(245,158,11,0.08)' : rejectAlert.type === 'danger' ? 'rgba(239,68,68,0.08)' : 'rgba(107,33,168,0.12)'
+              }}>
                 <div style={{ fontSize:28, marginBottom:8, textAlign:'center' }}>
-                  {rejectAlert.type==='warn'?'⚠️':rejectAlert.type==='danger'?'🔴':'🚫'}
+                  {rejectAlert.type === 'warn' ? '⚠️' : rejectAlert.type === 'danger' ? '🔴' : '🚫'}
                 </div>
-                <div style={{ color: rejectAlert.type==='warn'?P.warn:rejectAlert.type==='danger'?P.err:'#C084FC', fontWeight:800, fontSize:14, textAlign:'center', marginBottom:8 }}>
-                  {rejectAlert.type==='warn'?'Primer rechazo':rejectAlert.type==='danger'?'Segundo rechazo — penalización':'Cuenta suspendida'}
+                <div style={{ fontWeight:800, fontSize:14, textAlign:'center', marginBottom:8,
+                  color: rejectAlert.type === 'warn' ? P.warn : rejectAlert.type === 'danger' ? P.err : '#C084FC'
+                }}>
+                  {rejectAlert.type === 'warn' ? 'Primer rechazo' : rejectAlert.type === 'danger' ? 'Segundo rechazo - penalizacion' : 'Cuenta suspendida'}
                 </div>
-                <div style={{ color:'rgba(255,255,255,0.7)', fontSize:12, lineHeight:1.6, textAlign:'center', marginBottom: rejectAlert.type!=='banned'?14:0 }}>
+                <div style={{ color:'rgba(255,255,255,0.7)', fontSize:12, lineHeight:1.6, textAlign:'center', marginBottom: rejectAlert.type !== 'banned' ? 14 : 0 }}>
                   {rejectAlert.msg}
                 </div>
-                {rejectAlert.type!=='banned' && (
+                {rejectAlert.type !== 'banned' && (
                   <button onClick={() => setRejectAlert(null)} style={{ width:'100%', background:'rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.7)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:10, padding:10, cursor:'pointer', fontSize:13 }}>
                     Entendido
                   </button>
@@ -866,13 +870,12 @@ function LinzerView({ go, txnRequest, onComplete }) {
               </div>
             )}
 
-            {/* BANNED STATE */}
             {banned && (
               <div style={{ margin:'0 16px 16px', borderRadius:16, padding:22, border:'1.5px solid #6B21A8', background:'rgba(107,33,168,0.12)', textAlign:'center' }}>
                 <div style={{ fontSize:40, marginBottom:10 }}>🚫</div>
                 <div style={{ color:'#C084FC', fontWeight:900, fontSize:16, marginBottom:8 }}>Cuenta suspendida</div>
                 <div style={{ color:'rgba(255,255,255,0.55)', fontSize:12, lineHeight:1.6 }}>
-                  Has acumulado 3 rechazos. Tu cuenta ha sido bloqueada por QTT. Contacta a soporte para reactivación.
+                  Has acumulado 3 rechazos. Tu cuenta ha sido bloqueada por QTT. Contacta a soporte para reactivacion.
                 </div>
                 <div style={{ marginTop:14, background:'rgba(255,255,255,0.05)', borderRadius:10, padding:10 }}>
                   <div style={{ fontSize:11, color:P.mut }}>soporte@qtt.cl</div>
