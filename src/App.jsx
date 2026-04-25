@@ -59,11 +59,23 @@ const STEP_REQ = [
 
 const PHOTO_BGSV = ['#0D2A1A','#0D1A2A','#1A0D2A','#2A1A0D','#0D2A2A','#1A1A0D'];
 
-const SECOND_JOB = {
-  car: { brand:'Volkswagen', model:'Voyage 1.6 Comfortline', icon:'🚗', type:'Sedán' },
-  point: { id:5, local:'Saint Germain', addr:'Bellavista 0790', com:'Providencia' },
-  id: 'TXN-58295',
-};
+const POINTS_LIST = [
+  { id:1, local:'Autoplanet',    addr:'Pajaritos 3005',       com:'Maipú' },
+  { id:2, local:'Autoplanet',    addr:"Bernardo O'Higgins 800", com:'Quilicura' },
+  { id:5, local:'Saint Germain', addr:'Bellavista 0790',      com:'Providencia' },
+  { id:6, local:'Gama',          addr:'La Oración 1301',      com:'Pudahuel' },
+  { id:7, local:'Tu Auto Aquí',  addr:'Departamental 4500',   com:'Macul' },
+];
+
+function randomJob() {
+  const car  = CARS[Math.floor(Math.random() * CARS.length)];
+  const pt   = POINTS_LIST[Math.floor(Math.random() * POINTS_LIST.length)];
+  return {
+    car:  { brand:car.brand, model:car.model, icon:car.icon, type:car.type },
+    point:{ id:pt.id, local:pt.local, addr:pt.addr, com:pt.com },
+    id:   `TXN-${Math.floor(Math.random()*90000+10000)}`,
+  };
+}
 
 const POINTS = [
   { id:1, local:'Autoplanet',    addr:'Pajaritos 3005',         com:'Maipú' },
@@ -656,9 +668,10 @@ function LinzerView({ go, txnRequest, onComplete }) {
   const [pass, setPass]               = useState('');
   const [err, setErr]                 = useState('');
   const [isSecondJob, setIsSecondJob] = useState(false);
+  const [secondJob]                   = useState(() => randomJob());
   const [completing, setCompleting]   = useState(false);
 
-  const activeJob = isSecondJob ? SECOND_JOB : txnRequest;
+  const activeJob = isSecondJob ? secondJob : txnRequest;
 
   const login = () => {
     if (email==='juanperez@linzer.cl' && pass==='mapache') { setErr(''); setScreen('home'); }
