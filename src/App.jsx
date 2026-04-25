@@ -71,7 +71,7 @@ function randomJob() {
   const car  = CARS[Math.floor(Math.random() * CARS.length)];
   const pt   = POINTS_LIST[Math.floor(Math.random() * POINTS_LIST.length)];
   return {
-    car:  { brand:car.brand, model:car.model, icon:car.icon, type:car.type },
+    car:  { brand:car.brand, model:car.model, icon:car.icon, type:car.type, yr:car.yr, km:car.km, price:car.price },
     point:{ id:pt.id, local:pt.local, addr:pt.addr, com:pt.com },
     id:   `TXN-${Math.floor(Math.random()*90000+10000)}`,
   };
@@ -816,11 +816,17 @@ function LinzerView({ go, txnRequest, onComplete }) {
                   </div>
                 </div>
                 <div style={{ background:'rgba(255,255,255,0.05)', borderRadius:10, padding:12, marginBottom:12 }}>
-                  <div style={{ color:'#fff', fontSize:13, fontWeight:600 }}>
-                    {activeJob?.car ? `${activeJob.car.brand} ${activeJob.car.model}` : 'Auto demo'}
+                  <div style={{ color:'#fff', fontSize:13, fontWeight:700 }}>
+                    {activeJob?.car ? `${activeJob.car.brand} ${activeJob.car.model}` : 'Geely GS 1.8 Gc Mt'}
                   </div>
-                  <div style={{ color:P.mut, fontSize:12, marginTop:3 }}>
-                    📍 {activeJob?.point ? `${activeJob.point.local} — ${activeJob.point.com}` : 'Punto demo'}
+                  <div style={{ display:'flex', gap:12, marginTop:4 }}>
+                    <span style={{ color:P.mut, fontSize:11 }}>📅 {activeJob?.car?.yr || 2019}</span>
+                    <span style={{ color:P.mut, fontSize:11 }}>🛣️ {activeJob?.car?.km ? activeJob.car.km.toLocaleString('es-CL')+' km' : '100.000 km'}</span>
+                    <span style={{ color:P.mut, fontSize:11 }}>🚙 {activeJob?.car?.type || 'SUV'}</span>
+                  </div>
+                  <div style={{ color:P.mut, fontSize:12, marginTop:4 }}>
+                    📍 {activeJob?.point ? `${activeJob.point.local} — ${activeJob.point.com}` : 'Autoplanet — Maipú'}
+                  </div>
                   </div>
                   <div style={{ color:P.qt, fontSize:12, fontWeight:700, marginTop:5 }}>
                     Tu comisión: UF {commission.toFixed(2)} (70%){rejections>=2 && <span style={{ color:P.err, marginLeft:6 }}>-5%</span>}
@@ -899,10 +905,12 @@ function LinzerView({ go, txnRequest, onComplete }) {
             <div style={{ padding:'8px 16px', background:`${P.qt}08`, borderBottom:'1px solid #1A2030', flexShrink:0, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <div>
                 <div style={{ color:P.qt, fontWeight:700, fontSize:12 }}>
-                  {activeJob?.car ? `${activeJob.car.brand} ${activeJob.car.model}` : 'Toyota Land Cruiser 4.0'}
+                  {activeJob?.car ? `${activeJob.car.brand} ${activeJob.car.model}` : 'Geely GS 1.8 Gc Mt'}
                 </div>
-                <div style={{ color:P.mut, fontSize:11 }}>
-                  📍 {activeJob?.point ? `${activeJob.point.local} — ${activeJob.point.com}` : 'Autoplanet — Maipú'}
+                <div style={{ display:'flex', gap:8 }}>
+                  <span style={{ color:P.mut, fontSize:10 }}>📅 {activeJob?.car?.yr || 2019}</span>
+                  <span style={{ color:P.mut, fontSize:10 }}>🛣️ {activeJob?.car?.km ? activeJob.car.km.toLocaleString('es-CL')+' km' : '100.000 km'}</span>
+                  <span style={{ color:P.mut, fontSize:10 }}>📍 {activeJob?.point ? `${activeJob.point.local}` : 'Autoplanet'}</span>
                 </div>
               </div>
               <div style={{ fontSize:20 }}>{activeJob?.car?.icon || '🚗'}</div>
